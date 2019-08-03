@@ -13,17 +13,32 @@ SlitScan = function () {
 		buffCtx = bufferCanvas.getContext('2d'),
 		frames = [],
 		_camera = '',
+		stream = undefined,
 		videoPreviousTime = -1
+
+	// needed for ios 11 
+	video.attributes.playsinline = true
+	video.attributes.muted = true
+	video.attributes.autoplay = true
+
+	ctx.imageSmoothingEnabled = false
 
 	var options = {
 		video: video,
 		canvas: canvas,
 		get camera(){ return _camera },
 		set camera(value){
+			console.log('set camera', value)
 			_camera = value
 			navigator.mediaDevices.enumerateDevices().then(function(info) {
 				info.map(function(device){
+					// console.log(device)
 					if(device.label === value){
+						if(device.label.indexOf('back') !== -1){
+							canvas.classList.remove('mirror')
+						}else{
+							canvas.classList.add('mirror')
+						}
 						initCamera(device.deviceId)
 					}
 				})
@@ -47,9 +62,9 @@ SlitScan = function () {
 	// stats.domElement.style.top = '0'
 	// stats.domElement.style.left = '0'
 
-	video.addEventListener('play', function () {
-		update()
-	})
+	// video.addEventListener('play', function () {
+		// update()
+	// })
 
 	video.addEventListener('loadedmetadata', function(){
 		onResize()
@@ -81,35 +96,42 @@ SlitScan = function () {
 
 	function initCamera(cameraID){
 		console.log('initCamera', cameraID)
-		canvas.classList.add('mirror')
 		var constraints = {
 			video: {
-				mandatory: {
-					sourceId: cameraID
-				},
-				optional: [
-					{ minWidth: 1280 },
-					{ minHeight: 720 },
-					{ minFrameRate: 60 }
-				]
+				deviceId: cameraID,
+				width: {ideal: 1280},
+				height: {ideal: 720},
+				frameRate: {ideal: 60}
 			},
 			audio: false
 		}
+		console.log(constraints)
+
+		if(stream) {
+			console.log('stopping old stream')
+			video.pause()
+			stream.getVideoTracks()[0].stop()
+		}
+		
 		navigator.getUserMedia(constraints, function (localMediaStream) {
-			console.log('localMediaStream', localMediaStream)
+			console.log('!!!localMediaStream', localMediaStream)
+			stream = localMediaStream
+			console.log(localMediaStream.getVideoTracks()[0])
 			video.src = window.URL.createObjectURL(localMediaStream)
 			setTimeout(function(){
 				video.play()
 			}, 500)
 		}, function (e) {
+			console.error(e)
 			if (e.code === 1) {
-				console.log('User declined permissions.', e)
+				console.error('User declined permissions.', e)
 			}
 		})
 	}
 
 	var update = function(){
 		// console.log(video.currentTime)
+		// don't draw the same frame more than once
 		if(video.currentTime !== videoPreviousTime){
 			draw()
 		}
@@ -121,7 +143,8 @@ SlitScan = function () {
 
 	function drawVert() {
 
-		var sliceHeight = canvas.height / options.slices
+		// ceil prevents gaps in slices
+		var sliceHeight = Math.ceil(canvas.height / options.slices)
 
 		// save current frame to array
 		buffCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, bufferCanvas.width, bufferCanvas.height)
@@ -139,7 +162,8 @@ SlitScan = function () {
 
 	function drawHorz() {
 
-		var sliceWidth = canvas.width / options.slices
+		// ceil prevents gaps in slices
+		var sliceWidth = Math.ceil(canvas.width / options.slices)
 
 		// save current frame to array
 		buffCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, bufferCanvas.width, bufferCanvas.height)
@@ -170,6 +194,8 @@ SlitScan = function () {
 			frames.shift()
 		}
 	}
+
+	update()
 
 	return options
 }

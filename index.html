@@ -2,7 +2,7 @@
 <html lang="en-US">
 	<head>
 		<meta charset="UTF-8">
-		<title>Temporalis</title>
+		<title>Diálogos Univates</title>
 
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -16,9 +16,7 @@
 		<!-- TODO: figure out how to do this without depending on the google-youtube-upload component -->
 		<script src="./bower_components/webcomponentsjs/webcomponents.min.js"></script>
 		<link rel="import" href="./bower_components/polymer/polymer.html">
-		<link rel="import" href="./bower_components/google-youtube-upload/google-youtube-upload.html">
-		<script src="https://apis.google.com/js/api.js"></script>
-		<script>
+				<script>
 			function start(){
 				// 2. Initialize the JavaScript client library.
 				gapi.client.init({
@@ -42,24 +40,26 @@
 			gapi.load('client', start);
 		</script>
 
-		<script type="text/javascript" src="Recorder.js"></script>
+		<script type="text/javascript" src="bower_components/webrtc-adapter/release/adapter.js"></script>
+
 		<script type="text/javascript" src="SlitScan.js"></script>
 		<script type="text/javascript" src="libs/dat.gui.js"></script>
 		<!-- <script type="text/javascript" src="libs/stats.min.js"></script> -->
-
+		<script type="text/javascript" src="libs/gif.js"></script>
 
 		<link rel="stylesheet" href="style.css">
 
 	</head>
 
 	<body>
-		<div>
-			<img class="img-3" src="images/inscricoes-instalacao.png">
-			<img class="img-1" src="images/trans-instalacao.png">
-			<img class="img-2" src="images/letter-instalacao.png">
+
+		<img class="img-3" src="images/inscricoes-instalacao.png">
+		<img class="img-1" src="images/trans-instalacao.png">
+		<img class="img-2" src="images/letter-instalacao.png">
+
+		</div>
 
 		<script src='index.js'></script>
-		</div>
 
 		<script>
 			var _gaq = _gaq || [];
